@@ -1,14 +1,16 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react"
 import './App.css';
 import Family from './Family/Family';
 
 function App() {
   return (
     <Router>
-      {/* Analytics MUST be here (inside Router, outside Routes) */}
+      
       <Analytics />
-
+      <SpeedInsights />
+      
       <Routes>
         <Route path="/" element={<Family />} />
         <Route path="/family" element={<Family />} />

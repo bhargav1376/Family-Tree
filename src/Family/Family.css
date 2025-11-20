@@ -173,8 +173,8 @@ min-width: fit-content;
 width: 100%;
 overflow-x: auto;
 overflow-y: visible;
-margin-bottom: 1.5rem;
-padding-bottom: 1rem;
+/* margin-bottom: 1.5rem; */
+/* padding-bottom: 1rem; */
 -webkit-overflow-scrolling: touch;
 }
 
@@ -453,6 +453,21 @@ color: #9ca3af;
 margin-top: 0.1rem;
 }
 
+/* Card actions wrapper - shown only on hover */
+.family-tree-node-card-actions {
+display: flex;
+align-items: center;
+gap: 0.3rem;
+opacity: 0;
+visibility: hidden;
+transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.family-tree-node-card:hover .family-tree-node-card-actions {
+opacity: 1;
+visibility: visible;
+}
+
 /* Plus icon button inside person card */
 .family-tree-person-card-add-btn {
 border: none;
@@ -460,7 +475,6 @@ background: transparent;
 cursor: pointer;
 font-size: 1.15rem;
 padding: 0.1rem;
-margin-left: 0.15rem;
 color: #60a5fa;
 transition: transform 0.2s ease, color 0.2s ease;
 }
@@ -477,7 +491,6 @@ background: transparent;
 cursor: pointer;
 font-size: 0.9rem;
 padding: 0.1rem;
-margin-left: 0.1rem;
 color: #fca5a5;
 transition: transform 0.2s ease, color 0.2s ease;
 }
@@ -507,7 +520,7 @@ display: flex;
 align-items: center;
 justify-content: center;
 width: 40px;
-height: 40px;
+height: 80px;
 }
 
 .family-tree-add-spouse-side-btn:hover {
@@ -696,6 +709,15 @@ align-items: center;
 justify-content: center;
 z-index: 20;
 backdrop-filter: blur(4px);
+}
+
+/* Edit modal overlay with higher z-index */
+.family-tree-edit-modal-overlay {
+z-index: 30;
+}
+
+.family-tree-edit-modal {
+max-width: 800px;
 }
 
 .family-tree-modal {

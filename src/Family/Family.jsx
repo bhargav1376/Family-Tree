@@ -91,12 +91,14 @@ function Family() {
 const [treeData, setTreeData] = useState(defaultData);
 const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 const [modalTargetId, setModalTargetId] = useState(null);
-const [relationType, setRelationType] = useState("child"); // "child", "parent-father", "parent-mother", "spouse", "edit"
+const [relationType, setRelationType] = useState("child"); // "child", "parent-father", "parent-mother", "spouse"
 const [memberForms, setMemberForms] = useState([createEmptyPerson()]);
 const [profilePersonId, setProfilePersonId] = useState(null);
-const [isEditMode, setIsEditMode] = useState(false);
+const [editPersonId, setEditPersonId] = useState(null);
+const [editForm, setEditForm] = useState(createEmptyPerson());
 
 // Load from localStorage
 useEffect(() => {
@@ -192,37 +194,33 @@ if (motherParent) {
 }
 
 setMemberForms(forms);
-} else if (type === "edit") {
-const person = treeData.people[targetId];
-if (person) {
-setMemberForms([mapPersonToForm(person)]);
-} else {
-setMemberForms([createEmptyPerson()]);
-}
 } else {
 setMemberForms([createEmptyPerson()]);
 }
 
-setIsEditMode(type === "edit");
 setIsAddModalOpen(true);
 };
 
 const openEditModal = (personId) => {
 const person = treeData.people[personId];
 if (!person) return;
-setModalTargetId(personId);
-setRelationType("edit");
-setMemberForms([mapPersonToForm(person)]);
-setIsEditMode(true);
-setIsAddModalOpen(true);
+setEditPersonId(personId);
+setEditForm(mapPersonToForm(person));
+setIsEditModalOpen(true);
+setIsProfileModalOpen(false); // Close profile modal when opening edit
 };
 
 const closeAddModal = () => {
 setIsAddModalOpen(false);
-setIsEditMode(false);
 setModalTargetId(null);
 setMemberForms([createEmptyPerson()]);
 setRelationType("child");
+};
+
+const closeEditModal = () => {
+setIsEditModalOpen(false);
+setEditPersonId(null);
+setEditForm(createEmptyPerson());
 };
 
 const openProfileModal = (personId) => {
@@ -264,36 +262,52 @@ handleMemberFieldChange(index, "imageUrl", reader.result);
 reader.readAsDataURL(file);
 };
 
-const handleSubmitModal = (e) => {
-e.preventDefault();
-if (!modalTargetId) return;
+const handleEditFieldChange = (field, value) => {
+setEditForm((prev) => ({
+...prev,
+[field]: value,
+}));
+};
 
-if (relationType === "edit" && isEditMode) {
-// Update single person
-const form = memberForms[0];
+const handleEditImageUpload = (file) => {
+if (!file) return;
+const reader = new FileReader();
+reader.onloadend = () => {
+handleEditFieldChange("imageUrl", reader.result);
+};
+reader.readAsDataURL(file);
+};
+
+const handleSubmitEditModal = (e) => {
+e.preventDefault();
+if (!editPersonId) return;
+
 setTreeData((prev) => {
 const updatedPeople = { ...prev.people };
-const person = updatedPeople[modalTargetId];
+const person = updatedPeople[editPersonId];
 if (!person) return prev;
 
-updatedPeople[modalTargetId] = {
+updatedPeople[editPersonId] = {
   ...person,
-  fullName: form.fullName,
-  dob: form.dob,
-  imageUrl: form.imageUrl,
-  instagram: form.instagram,
-  linkedin: form.linkedin,
-  phone: form.phone,
-  whatsapp: form.whatsapp,
+  fullName: editForm.fullName,
+  dob: editForm.dob,
+  imageUrl: editForm.imageUrl,
+  instagram: editForm.instagram,
+  linkedin: editForm.linkedin,
+  phone: editForm.phone,
+  whatsapp: editForm.whatsapp,
 };
 return {
   ...prev,
   people: updatedPeople,
 };
 });
-closeAddModal();
-return;
-}
+closeEditModal();
+};
+
+const handleSubmitModal = (e) => {
+e.preventDefault();
+if (!modalTargetId) return;
 
 if (relationType === "child") {
 handleAddChildren(modalTargetId, memberForms);
@@ -660,9 +674,7 @@ return (
       ×
     </button>
     <h2 className="family-tree-modal-title">
-      {isEditMode
-        ? "Edit Person"
-        : relationType === "parent-father"
+      {relationType === "parent-father"
         ? "Add Previous Generation (Father's Side)"
         : relationType === "parent-mother"
         ? "Add Previous Generation (Mother's Side)"
@@ -671,8 +683,7 @@ return (
         : "Add New Generation (Children)"}
     </h2>
 
-    {!isEditMode && (
-      <div className="family-tree-modal-info">
+    <div className="family-tree-modal-info">
         {relationType === "child" ? (
           <span>
             You can add one or more children (N members) at once.
@@ -691,7 +702,6 @@ return (
           </span>
         )}
       </div>
-    )}
 
     <form onSubmit={handleSubmitModal}>
       <div className="family-tree-modal-body">
@@ -700,20 +710,18 @@ return (
             key={idx}
             className="family-tree-member-form-block"
           >
-            {!isEditMode && (
-              <div className="family-tree-member-form-header">
-                <span>Member #{idx + 1}</span>
-                {memberForms.length > 1 && (
-                  <button
-                    type="button"
-                    className="family-tree-remove-member-btn"
-                    onClick={() => handleRemoveMemberRow(idx)}
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            )}
+            <div className="family-tree-member-form-header">
+              <span>Member #{idx + 1}</span>
+              {memberForms.length > 1 && (
+                <button
+                  type="button"
+                  className="family-tree-remove-member-btn"
+                  onClick={() => handleRemoveMemberRow(idx)}
+                >
+                  Remove
+                </button>
+              )}
+            </div>
 
             <div className="family-tree-form-grid">
               <label className="family-tree-form-field">
@@ -860,7 +868,7 @@ return (
       </div>
 
       <div className="family-tree-modal-footer">
-        {!isEditMode && relationType === "child" && (
+        {relationType === "child" && (
           <button
             type="button"
             className="family-tree-add-member-btn"
@@ -882,7 +890,7 @@ return (
             type="submit"
             className="family-tree-btn-primary"
           >
-            {isEditMode ? "Save Changes" : "Save"}
+            Save
           </button>
         </div>
       </div>
@@ -898,6 +906,18 @@ return (
   onClose={closeProfileModal}
   onEdit={() => openEditModal(profilePersonId)}
   onDelete={() => handleDeletePerson(profilePersonId)}
+/>
+)}
+
+{/* Edit Modal */}
+{isEditModalOpen && editPersonId && (
+<EditModal
+  person={treeData.people[editPersonId]}
+  form={editForm}
+  onFieldChange={handleEditFieldChange}
+  onImageUpload={handleEditImageUpload}
+  onSubmit={handleSubmitEditModal}
+  onClose={closeEditModal}
 />
 )}
 
@@ -973,31 +993,35 @@ onClick={() => onSelect(p.id)}
     </div>
   )}
 </div>
-{/* Plus icon (do NOT trigger profile) */}
-<button
-  className="family-tree-person-card-add-btn"
-  type="button"
-  onClick={(e) => {
-    e.stopPropagation();
-    onAddClick(p.id, "child");
-  }}
->
-  <i className="fa fa-plus-square" aria-hidden="true" />
-</button>
-{/* Remove button for children */}
-{p.parentId && (
+{/* Buttons shown only on hover */}
+<div className="family-tree-node-card-actions">
+  {/* Plus icon (do NOT trigger profile) */}
   <button
-    className="family-tree-node-remove-btn"
+    className="family-tree-person-card-add-btn"
     type="button"
     onClick={(e) => {
       e.stopPropagation();
-      onRemoveChild(p.id);
+      onAddClick(p.id, "child");
     }}
-    title="Remove this child"
+    title="Add child"
   >
-    <i className="fa fa-times" aria-hidden="true" />
+    <i className="fa fa-plus-square" aria-hidden="true" />
   </button>
-)}
+  {/* Remove button for children */}
+  {p.parentId && (
+    <button
+      className="family-tree-node-remove-btn"
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onRemoveChild(p.id);
+      }}
+      title="Remove this child"
+    >
+      <i className="fa fa-times" aria-hidden="true" />
+    </button>
+  )}
+</div>
 </div>
 </div>
 );
@@ -1292,6 +1316,158 @@ onClick={(e) => e.stopPropagation()}
     <i className="fa fa-trash"></i> Delete
   </button>
 </div>
+</div>
+</div>
+);
+}
+
+function EditModal({ person, form, onFieldChange, onImageUpload, onSubmit, onClose }) {
+if (!person) return null;
+
+return (
+<div className="family-tree-modal-overlay family-tree-edit-modal-overlay" onClick={onClose}>
+<div
+className="family-tree-modal family-tree-edit-modal"
+onClick={(e) => e.stopPropagation()}
+>
+<button
+  className="family-tree-modal-close"
+  onClick={onClose}
+>
+  ×
+</button>
+<h2 className="family-tree-modal-title">
+  <i className="fa fa-edit"></i> Edit Person
+</h2>
+
+<form onSubmit={onSubmit}>
+  <div className="family-tree-modal-body">
+    <div className="family-tree-member-form-block">
+      <div className="family-tree-form-grid">
+        <label className="family-tree-form-field">
+          <span>Full Name</span>
+          <input
+            type="text"
+            required
+            value={form.fullName}
+            onChange={(e) => onFieldChange("fullName", e.target.value)}
+          />
+        </label>
+
+        <label className="family-tree-form-field">
+          <span>Date of Birth</span>
+          <input
+            type="date"
+            value={form.dob}
+            onChange={(e) => onFieldChange("dob", e.target.value)}
+          />
+        </label>
+
+        <label className="family-tree-form-field">
+          <span>Phone Number</span>
+          <input
+            type="tel"
+            value={form.phone}
+            onChange={(e) => onFieldChange("phone", e.target.value)}
+            placeholder="+911234567890"
+          />
+        </label>
+
+        <label className="family-tree-form-field family-tree-image-upload-field">
+          <span>
+            <i className="fa fa-image"></i> Profile Image
+          </span>
+          <div className="family-tree-image-upload-wrapper">
+            {form.imageUrl ? (
+              <div className="family-tree-image-preview">
+                <img src={form.imageUrl} alt="Preview" />
+                <button
+                  type="button"
+                  className="family-tree-remove-image-btn"
+                  onClick={() => onFieldChange("imageUrl", "")}
+                  title="Remove image"
+                >
+                  <i className="fa fa-times"></i>
+                </button>
+              </div>
+            ) : (
+              <div className="family-tree-image-placeholder">
+                <i className="fa fa-user-circle"></i>
+                <span>No image</span>
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  onImageUpload(file);
+                }
+              }}
+              className="family-tree-file-input"
+              id="edit-image-upload"
+            />
+            <label
+              htmlFor="edit-image-upload"
+              className="family-tree-upload-btn"
+            >
+              <i className="fa fa-upload"></i> {form.imageUrl ? "Change Image" : "Upload Image"}
+            </label>
+          </div>
+        </label>
+
+        <label className="family-tree-form-field">
+          <span>Instagram URL</span>
+          <input
+            type="url"
+            value={form.instagram}
+            onChange={(e) => onFieldChange("instagram", e.target.value)}
+            placeholder="https://instagram.com/username"
+          />
+        </label>
+
+        <label className="family-tree-form-field">
+          <span>LinkedIn URL</span>
+          <input
+            type="url"
+            value={form.linkedin}
+            onChange={(e) => onFieldChange("linkedin", e.target.value)}
+            placeholder="https://linkedin.com/in/username"
+          />
+        </label>
+
+        <label className="family-tree-form-field">
+          <span>WhatsApp Number</span>
+          <input
+            type="tel"
+            value={form.whatsapp}
+            onChange={(e) => onFieldChange("whatsapp", e.target.value)}
+            placeholder="+911234567890"
+          />
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div className="family-tree-modal-footer">
+    <div className="family-tree-modal-actions">
+      <button
+        type="button"
+        className="family-tree-btn-secondary"
+        onClick={onClose}
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        className="family-tree-btn-primary"
+      >
+        <i className="fa fa-save"></i> Save Changes
+      </button>
+    </div>
+  </div>
+</form>
 </div>
 </div>
 );

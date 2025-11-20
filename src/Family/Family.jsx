@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Family.css";
 
+
 const LOCAL_STORAGE_KEY = "family-tree-data-v1";
 
 const defaultData = {

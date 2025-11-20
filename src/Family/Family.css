@@ -91,6 +91,7 @@ color: #fbbf24;
 margin: 0.3rem 0 0;
 font-size: 0.9rem;
 opacity: 0.8;
+padding-bottom: 30px;
 }
 
 .family-tree-main {
@@ -99,19 +100,28 @@ padding-bottom: 3rem;
 }
 
   .family-tree-tree-wrapper {
-    overflow-x: auto;
+    display: block !important;
+  width: 100%;
+  overflow-x: auto !important;
     overflow-y: visible;
     /* width: 100%; */
+    padding-top: 1.5rem;
     padding-bottom: 3rem;
     position: relative;
     display: flex;
     justify-content: center;
+    white-space: normal !important;
+    text-align: center !important;
+    padding-left: 1.5rem;
+    padding-right: 1rem;
   }
   
 
 /* NODE + LINES */
 .family-tree-node {
+display: inline-block !important;
 text-align: center;
+vertical-align: top;
 position: relative;
 padding: 0;
 animation: family-tree-fade-in 0.5s ease-out;
@@ -255,11 +265,12 @@ min-height: 40px;
 /* Vertical connector from each grandparent set to father/mother */
 .family-tree-grandparents-connector {
 width: 2px;
-height: 40px;
+height: 25px;
 background: rgba(148, 163, 184, 0.7);
-margin-top: 0.5rem;
-margin-bottom: 0.5rem;
+margin-top: 0.3rem;
+margin-bottom: 0rem;
 align-self: center;
+margin-left: 18px;
 }
 
 /* Add parent button wrapper - above spouse pair */
@@ -267,9 +278,9 @@ align-self: center;
 display: flex;
 align-items: center;
 justify-content: center;
-margin-bottom: 0.5rem;
+margin-bottom: -0.2rem;
 min-height: 40px;
-gap: 1rem;
+gap: 10rem;
 width: 100%;
 }
 
@@ -547,17 +558,38 @@ width: 2px;
 height: 20px;
 background: rgba(148, 163, 184, 0.7);
 margin-bottom: 0.4rem;
+align-self: center;
+flex-shrink: 0;
+}
+
+/* Scrollable container for horizontal line and children */
+.family-tree-children-scroll-container {
+  overflow-x: auto !important;
+  overflow-y: visible;
+  width: max-content !important;
+  margin: 0 auto; 
+-webkit-overflow-scrolling: touch;
+scroll-behavior: smooth;
+min-width: 0;
+position: relative;
 }
 
 /* Horizontal line wrapper with end brackets */
 .family-tree-horizontal-line-wrapper {
 display: flex;
 align-items: center;
-justify-content: center;
+justify-content: flex-start;
 width: 100%;
-margin: 0 auto 0.4rem;
+min-width: min-content;
 position: relative;
 padding: 0 1rem;
+flex-shrink: 0;
+}
+
+/* Ensure horizontal line wrapper matches children wrapper width */
+.family-tree-children-scroll-container > .family-tree-horizontal-line-wrapper {
+width: 100%;
+min-width: min-content;
 }
 
 .family-tree-horizontal-line-end-left,
@@ -583,27 +615,40 @@ border-top-right-radius: 2px;
 height: 2px;
 background: rgba(148, 163, 184, 0.75);
 flex: 1;
-min-width: 0;
-transform-origin: center;
+min-width: calc(100% - 4px);
+width: 100%;
+transform-origin: left;
 animation: family-tree-line-grow-horizontal 0.45s ease-out;
 position: relative;
 }
 
-.family-tree-children-wrapper {
+/* Make horizontal line wrapper match children wrapper width exactly */
+.family-tree-children-scroll-container {
 display: flex;
-justify-content: flex-start;
+flex-direction: column;
+}
+
+.family-tree-children-scroll-container > .family-tree-horizontal-line-wrapper,
+.family-tree-children-scroll-container > .family-tree-children-wrapper {
+min-width: min-content;
+width: 100%;
+}
+
+.family-tree-children-wrapper {
+  display: inline-flex !important;
+  justify-content: center !important;
+  gap: 1.5rem;
+  width: max-content !important;
+  min-width: max-content !important;
 align-items: flex-start;
 gap: 1.5rem;
-margin-top: 0.4rem;
+margin-top: -0.1rem;
 flex-wrap: nowrap;
 position: relative;
-overflow-x: auto;
-overflow-y: visible;
 width: 100%;
-padding: 0.5rem 1rem;
--webkit-overflow-scrolling: touch;
-scroll-behavior: smooth;
 min-width: min-content;
+/* padding: 0.5rem 1rem; */
+flex-shrink: 0;
 }
 
 .family-tree-children-wrapper > * {
@@ -637,13 +682,32 @@ width: auto;
 /* Vertical connector from horizontal line down to child card */
 .family-tree-child-connector-from-line {
 width: 2px;
-height: 25px;
+height: 30px;
 background: rgba(148, 163, 184, 0.75);
 margin-bottom: 0.3rem;
 margin-top: -0.3rem;
 animation: family-tree-line-grow 0.4s ease-out;
 align-self: center;
 flex-shrink: 0;
+}
+
+/* Scrollbar styling for children scroll container */
+.family-tree-children-scroll-container::-webkit-scrollbar {
+height: 8px;
+}
+
+.family-tree-children-scroll-container::-webkit-scrollbar-track {
+background: rgba(15, 23, 42, 0.3);
+border-radius: 4px;
+}
+
+.family-tree-children-scroll-container::-webkit-scrollbar-thumb {
+background: rgba(96, 165, 250, 0.5);
+border-radius: 4px;
+}
+
+.family-tree-children-scroll-container::-webkit-scrollbar-thumb:hover {
+background: rgba(96, 165, 250, 0.7);
 }
 
 .family-tree-children-wrapper::-webkit-scrollbar {
@@ -674,6 +738,11 @@ min-width: 60px;
 min-height: 60px;
 flex-shrink: 0;
 position: relative;
+}
+
+/* Ensure connector line is visible for add child button */
+.family-tree-add-child-btn-wrapper .family-tree-child-connector-from-line {
+display: block;
 }
 
 .family-tree-add-child-side-btn {
@@ -1356,3 +1425,15 @@ gap: 1rem;
 }
 }
 
+.family-tree-tree-wrapper::-webkit-scrollbar,
+.family-tree-children-scroll-container::-webkit-scrollbar,
+.family-tree-children-wrapper::-webkit-scrollbar {
+  display: none !important;
+}
+
+.family-tree-tree-wrapper,
+.family-tree-children-scroll-container,
+.family-tree-children-wrapper {
+  scrollbar-width: none !important;  
+  -ms-overflow-style: none !important; 
+}

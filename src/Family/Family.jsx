@@ -1067,6 +1067,7 @@ return (
           >
             <i className="fa fa-plus-square" aria-hidden="true" />
           </button>
+          
         </div>
       )}
     </div>
@@ -1105,6 +1106,7 @@ return (
           >
             <i className="fa fa-plus-square" aria-hidden="true" />
           </button>
+          
         </div>
       )}
     </div>
@@ -1115,7 +1117,8 @@ return (
 {/* Parent buttons - show if no grandparents yet and person is father or mother */}
 {!showGrandparents && (isFather || isMother) && (
 <div className="family-tree-add-parent-btn-wrapper">
-  <button
+  <div className="family-tree-grandparents-connector-wrapper">
+    <button
     className="family-tree-add-parent-btn"
     type="button"
     onClick={() => onAddClick(isFather ? person.id : (spouse ? spouse.id : person.id), "parent-father")}
@@ -1123,6 +1126,9 @@ return (
   >
     <i className="fa fa-plus-square" aria-hidden="true" />
   </button>
+  <div className="family-tree-grandparents-connector" />
+  </div>
+  <div className="family-tree-grandparents-connector-wrapper">
   <button
     className="family-tree-add-parent-btn"
     type="button"
@@ -1131,6 +1137,8 @@ return (
   >
     <i className="fa fa-plus-square" aria-hidden="true" />
   </button>
+  <div className="family-tree-grandparents-connector" />  
+  </div>  
 </div>
 )}
 
@@ -1165,39 +1173,59 @@ return (
         {children.length > 0 && (
           <>
             <div className="family-tree-vertical-connector" />
-            <div className="family-tree-horizontal-line-wrapper">
-              <div className="family-tree-horizontal-line-end-left" />
-              <div className="family-tree-horizontal-line" />
-              <div className="family-tree-horizontal-line-end-right" />
+            <div className="family-tree-children-scroll-container">
+              <div className="family-tree-horizontal-line-wrapper">
+                <div className="family-tree-horizontal-line-end-left" />
+                <div className="family-tree-horizontal-line" />
+                <div className="family-tree-horizontal-line-end-right" />
+              </div>
+              <div className="family-tree-children-wrapper">
+                {children.map((child) => (
+                  <div key={child.id} className="family-tree-child-node-wrapper">
+                    <div className="family-tree-child-connector-from-line" />
+                    <FamilyTreeNode
+                      person={child}
+                      people={people}
+                      onSelect={onSelect}
+                      onAddClick={onAddClick}
+                      onRemoveChild={onRemoveChild}
+                    />
+                  </div>
+                ))}
+                {/* Add child button */}
+                <div className="family-tree-add-child-btn-wrapper">
+                  <div className="family-tree-child-connector-from-line" />
+                  <button
+                    className="family-tree-add-child-side-btn"
+                    type="button"
+                    onClick={() => onAddClick(person.id, "child")}
+                    title="Add child"
+                  >
+                    <i className="fa fa-plus-square" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
             </div>
           </>
         )}
-        <div className="family-tree-children-wrapper">
-          {children.map((child) => (
-            <div key={child.id} className="family-tree-child-node-wrapper">
+        {children.length === 0 && (
+          <div className="family-tree-children-scroll-container">
+            <div className="family-tree-children-wrapper">
+              {/* Add child button when no children */}
+              <div className="family-tree-add-child-btn-wrapper">
               <div className="family-tree-child-connector-from-line" />
-              <FamilyTreeNode
-                person={child}
-                people={people}
-                onSelect={onSelect}
-                onAddClick={onAddClick}
-                onRemoveChild={onRemoveChild}
-              />
+                <button
+                  className="family-tree-add-child-side-btn"
+                  type="button"
+                  onClick={() => onAddClick(person.id, "child")}
+                  title="Add child"
+                >
+                  <i className="fa fa-plus-square" aria-hidden="true" />
+                </button>
+              </div>
             </div>
-          ))}
-          {/* Add child button */}
-          <div className="family-tree-add-child-btn-wrapper">
-            <div className="family-tree-child-connector-from-line" />
-            <button
-              className="family-tree-add-child-side-btn"
-              type="button"
-              onClick={() => onAddClick(person.id, "child")}
-              title="Add child"
-            >
-              <i className="fa fa-plus-square" aria-hidden="true" />
-            </button>
           </div>
-        </div>
+        )}
       </div>
 </div>
 );
